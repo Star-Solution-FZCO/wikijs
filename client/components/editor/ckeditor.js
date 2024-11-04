@@ -36,7 +36,7 @@ import { RemoveFormat } from '@ckeditor/ckeditor5-remove-format'
 import { SelectAll } from '@ckeditor/ckeditor5-select-all'
 import { SimpleUploadAdapter } from '@ckeditor/ckeditor5-upload'
 import { SpecialCharacters } from '@ckeditor/ckeditor5-special-characters'
-import { Table, TableColumnResize, TableToolbar } from '@ckeditor/ckeditor5-table'
+import { Table, TableColumnResize, TableToolbar, TableProperties, TableCellProperties } from '@ckeditor/ckeditor5-table'
 import { TextTransformation } from '@ckeditor/ckeditor5-typing'
 import { Undo } from '@ckeditor/ckeditor5-undo'
 import { WordCount } from '@ckeditor/ckeditor5-word-count'
@@ -137,6 +137,8 @@ const plugins = [
   Table,
   TableToolbar,
   TableColumnResize,
+  TableProperties,
+  TableCellProperties,
   TextTransformation,
   TodoList,
   Underline,
@@ -227,7 +229,7 @@ const editorConfig = {
     defaultProtocol: 'https://'
   },
   table: {
-    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
   }
 }
 
