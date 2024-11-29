@@ -95,7 +95,9 @@ router.post('/u', (req, res, next) => {
     assetPath,
     user: req.user
   })
-  res.send('ok')
+  res.send({
+    url: '/' + assetPath
+  })
 })
 
 router.get('/u', async (req, res, next) => {

@@ -17,7 +17,7 @@ import { AutoLink, Link } from '@ckeditor/ckeditor5-link'
 import { Autosave } from '@ckeditor/ckeditor5-autosave'
 import { BlockQuote } from '@ckeditor/ckeditor5-block-quote'
 import { Bold, Code, Italic, Strikethrough, Subscript, Superscript, Underline } from '@ckeditor/ckeditor5-basic-styles'
-import { CloudServices } from '@ckeditor/ckeditor5-cloud-services'
+import { Clipboard } from '@ckeditor/ckeditor5-clipboard'
 import { CodeBlock } from '@ckeditor/ckeditor5-code-block'
 import { Essentials } from '@ckeditor/ckeditor5-essentials'
 import { FindAndReplace } from '@ckeditor/ckeditor5-find-and-replace'
@@ -40,6 +40,7 @@ import { Table, TableColumnResize, TableToolbar, TableProperties, TableCellPrope
 import { TextTransformation } from '@ckeditor/ckeditor5-typing'
 import { Undo } from '@ckeditor/ckeditor5-undo'
 import { WordCount } from '@ckeditor/ckeditor5-word-count'
+import UploadAdapterPlugin from './upload-adapter'
 
 import 'ckeditor5/dist/ckeditor5.css'
 
@@ -100,7 +101,7 @@ const plugins = [
   Autosave,
   BlockQuote,
   Bold,
-  CloudServices,
+  Clipboard,
   Code,
   CodeBlock,
   Essentials,
@@ -197,6 +198,7 @@ const toolbar = {
 const editorConfig = {
   toolbar,
   plugins,
+  extraPlugins: [UploadAdapterPlugin],
   fontFamily: {
     supportAllValues: true
   },
