@@ -483,7 +483,8 @@ export default {
           const file = item.getAsFile()
           if (file) {
             const imageUrl = await this.uploadImage(file)
-            this.insertAfter({content: `![${file.name}](${imageUrl})`, newLine: true})
+            const filename = imageUrl.split('/').pop()
+            this.insertAfter({content: `![${filename}](${imageUrl})`, newLine: true})
           }
         }
       }
@@ -495,7 +496,8 @@ export default {
       for (const file of files) {
         if (file.type.startsWith('image/')) {
           const imageUrl = await this.uploadImage(file)
-          this.insertAfter({content: `![${file.name}](${imageUrl})`, newLine: true})
+          const filename = imageUrl.split('/').pop()
+          this.insertAfter({content: `![${filename}](${imageUrl})`, newLine: true})
         }
       }
     },
