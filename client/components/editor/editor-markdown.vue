@@ -475,7 +475,7 @@ export default {
         })
     },
     async handlePaste(event) {
-      const items = event.clipboardData?.items
+      const items = event.clipboardData && event.clipboardData.items
       if (!items) return
 
       for (const item of items) {
@@ -490,7 +490,7 @@ export default {
       }
     },
     async handleDrop(event) {
-      const files = event.dataTransfer?.files
+      const files = event.dataTransfer && event.dataTransfer.files
       if (!files || files.length === 0) return
 
       for (const file of files) {
