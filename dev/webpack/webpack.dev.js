@@ -151,11 +151,11 @@ module.exports = {
         ],
         use: [
           {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'svg/'
-            }
+            loader: 'raw-loader'
+            // options: {
+            //   name: '[name].[ext]',
+            //   outputPath: 'svg/'
+            // }
           }
         ]
       },

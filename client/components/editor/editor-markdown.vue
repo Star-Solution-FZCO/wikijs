@@ -98,6 +98,9 @@
             v-btn.animated.fadeIn.wait-p11s(icon, tile, v-on='on', @click='insertAfter({ content: `---`, newLine: true })').mx-0
               v-icon mdi-minus
           span {{$t('editor:markup.horizontalBar')}}
+        template(v-if='imageUploading')
+          .loader
+            half-circle-spinner(:size='24', color='#FFF')
         template(v-if='$vuetify.breakpoint.mdAndUp')
           v-spacer
           v-tooltip(bottom, color='primary', v-if='previewShown')
@@ -139,7 +142,11 @@
               v-btn.mt-3.animated.fadeInLeft.wait-p4s(icon, tile, v-on='on', dark, @click='toggleHelp').mx-0
                 v-icon(:color='helpShown ? `teal` : ``') mdi-help-circle
             span {{$t('editor:markup.markdownFormattingHelp')}}
-      .editor-markdown-editor
+      .editor-markdown-editor(
+        @paste="handlePaste"
+        @dragover.prevent
+        @drop.prevent="handleDrop"
+      )
         textarea(ref='cm')
       transition(name='editor-markdown-preview')
         .editor-markdown-preview(v-if='previewShown')
@@ -226,6 +233,9 @@ import mermaid from 'mermaid'
 import katexHelper from './common/katex'
 import tabsetHelper from './markdown/tabset'
 import cmFold from './common/cmFold'
+
+import Cookies from 'js-cookie'
+import { HalfCircleSpinner } from 'epic-spinners'
 
 // ========================================
 // INIT
@@ -370,7 +380,8 @@ let mermaidId = 0
 
 export default {
   components: {
-    markdownHelp
+    markdownHelp,
+    HalfCircleSpinner
   },
   props: {
     save: {
@@ -387,7 +398,8 @@ export default {
       previewHTML: '',
       helpShown: false,
       spellModeActive: false,
-      insertLinkDialog: false
+      insertLinkDialog: false,
+      imageUploading: false
     }
   },
   computed: {
@@ -432,22 +444,72 @@ export default {
     onCmInput: _.debounce(function (newContent) {
       this.processContent(newContent)
     }, 600),
-    onCmPaste (cm, ev) {
-      // const clipItems = (ev.clipboardData || ev.originalEvent.clipboardData).items
-      // for (let clipItem of clipItems) {
-      //   if (_.startsWith(clipItem.type, 'image/')) {
-      //     const file = clipItem.getAsFile()
-      //     const reader = new FileReader()
-      //     reader.onload = evt => {
-      //       this.$store.commit(`loadingStart`, 'editor-paste-image')
-      //       this.insertAfter({
-      //         content: `![${file.name}](${evt.target.result})`,
-      //         newLine: true
-      //       })
-      //     }
-      //     reader.readAsDataURL(file)
-      //   }
-      // }
+    async uploadImage(file) {
+      const formData = new FormData()
+      formData.append('mediaUpload', file)
+      formData.append('mediaUpload', JSON.stringify({ folderId: 0 }))
+
+      const jwtCookie = Cookies.get('jwt')
+      const headers = {
+        'Authorization': `Bearer ${jwtCookie}`
+      }
+
+      this.imageUploading = true
+
+      return fetch('/u', {
+        method: 'POST',
+        body: formData,
+        headers: headers,
+        signal: this.signal
+      })
+        .then(async (response) => {
+          if (response.ok) {
+            const data = await response.json()
+            return data.url
+          } else {
+            const errorMessage = await response.text()
+            alert(
+              `An error occurred while uploading the file: ${errorMessage}`
+            )
+            throw new Error(errorMessage || 'Upload failed')
+          }
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') {
+            return
+          }
+          alert('An error occurred while uploading the file')
+          throw error
+        }).finally(() => {
+          this.imageUploading = false
+        })
+    },
+    async handlePaste(event) {
+      const items = event.clipboardData && event.clipboardData.items
+      if (!items) return
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile()
+          if (file) {
+            const imageUrl = await this.uploadImage(file)
+            const filename = imageUrl.split('/').pop()
+            this.insertAfter({content: `![${filename}](${imageUrl})`, newLine: true})
+          }
+        }
+      }
+    },
+    async handleDrop(event) {
+      const files = event.dataTransfer && event.dataTransfer.files
+      if (!files || files.length === 0) return
+
+      for (const file of files) {
+        if (file.type.startsWith('image/')) {
+          const imageUrl = await this.uploadImage(file)
+          const filename = imageUrl.split('/').pop()
+          this.insertAfter({content: `![${filename}](${imageUrl})`, newLine: true})
+        }
+      }
     },
     processContent (newContent) {
       linesMap = []
@@ -812,10 +874,6 @@ export default {
       this.scrollSync(c)
     })
 
-    // Handle special paste
-
-    this.cm.on('paste', this.onCmPaste)
-
     // Render initial preview
 
     this.processContent(this.$store.get('editor/content'))
@@ -1024,6 +1082,14 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
       justify-content: center;
       align-items: center;
     }
+  }
+
+  .loader {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   // ==========================================
