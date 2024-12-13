@@ -98,6 +98,9 @@
             v-btn.animated.fadeIn.wait-p11s(icon, tile, v-on='on', @click='insertAfter({ content: `---`, newLine: true })').mx-0
               v-icon mdi-minus
           span {{$t('editor:markup.horizontalBar')}}
+        template(v-if='imageUploading')
+          .loader
+            half-circle-spinner(:size='24', color='#FFF')
         template(v-if='$vuetify.breakpoint.mdAndUp')
           v-spacer
           v-tooltip(bottom, color='primary', v-if='previewShown')
@@ -232,6 +235,7 @@ import tabsetHelper from './markdown/tabset'
 import cmFold from './common/cmFold'
 
 import Cookies from 'js-cookie'
+import { HalfCircleSpinner } from 'epic-spinners'
 
 // ========================================
 // INIT
@@ -376,7 +380,8 @@ let mermaidId = 0
 
 export default {
   components: {
-    markdownHelp
+    markdownHelp,
+    HalfCircleSpinner
   },
   props: {
     save: {
@@ -393,7 +398,8 @@ export default {
       previewHTML: '',
       helpShown: false,
       spellModeActive: false,
-      insertLinkDialog: false
+      insertLinkDialog: false,
+      imageUploading: false
     }
   },
   computed: {
@@ -448,6 +454,8 @@ export default {
         'Authorization': `Bearer ${jwtCookie}`
       }
 
+      this.imageUploading = true
+
       return fetch('/u', {
         method: 'POST',
         body: formData,
@@ -472,6 +480,8 @@ export default {
           }
           alert('An error occurred while uploading the file')
           throw error
+        }).finally(() => {
+          this.imageUploading = false
         })
     },
     async handlePaste(event) {
@@ -1072,6 +1082,14 @@ $editor-height-mobile: calc(100vh - 112px - 16px);
       justify-content: center;
       align-items: center;
     }
+  }
+
+  .loader {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   // ==========================================
